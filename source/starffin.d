@@ -37,6 +37,7 @@ void main()
             override void widgetSelected(SelectionEvent e)
             {
                 auto dialog = new DirectoryDialog(shell);
+                dialog.setFilterPath(folderText.getText());
                 auto path = dialog.open();
                 if (path)
                 {
