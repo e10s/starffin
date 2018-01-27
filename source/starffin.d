@@ -2,6 +2,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.all;
 import org.eclipse.swt.widgets.all;
 
+import std.file;
+
 void main()
 {
     immutable name = "Starffin";
@@ -17,7 +19,8 @@ void main()
     folderLabel.setText("Folder:");
 
     auto folderText = new Text(shell, SWT.SINGLE | SWT.BORDER);
-    folderText.setText("Where to search");
+
+    folderText.setText(getcwd());
     folderText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
     auto openFolderButton = new Button(shell, SWT.NULL);
@@ -35,7 +38,10 @@ void main()
             {
                 auto dialog = new DirectoryDialog(shell);
                 auto path = dialog.open();
-                folderText.setText(path);
+                if (path)
+                {
+                    folderText.setText(path);
+                }
             }
         }
     }
