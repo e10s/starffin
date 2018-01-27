@@ -23,6 +23,32 @@ void main()
     folderText.setText(getcwd());
     folderText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+    import org.eclipse.swt.dnd.all;
+
+    class FolderDropTargetAdapter : DropTargetAdapter
+    {
+        override void dragEnter(DropTargetEvent e)
+        {
+            e.detail = DND.DROP_COPY;
+        }
+
+        override void drop(DropTargetEvent e)
+        {
+            import java.lang.wrappers;
+            import std.array;
+
+            auto dropped = e.data.stringArrayFromObject;
+            if (!dropped.empty)
+            {
+                folderText.setText(dropped.front);
+            }
+        }
+    }
+
+    auto target = new DropTarget(folderText, DND.DROP_DEFAULT | DND.DROP_COPY);
+    target.setTransfer([cast(Transfer) FileTransfer.getInstance()]);
+    target.addDropListener(new FolderDropTargetAdapter);
+
     auto openFolderButton = new Button(shell, SWT.NULL);
     openFolderButton.setText("...");
 
