@@ -23,6 +23,25 @@ void main()
     auto openFolderButton = new Button(shell, SWT.NULL);
     openFolderButton.setText("...");
 
+    template FolderSelectionAdapter()
+    {
+        import org.eclipse.swt.events.SelectionAdapter;
+
+        class FolderSelectionAdapter : SelectionAdapter
+        {
+            import org.eclipse.swt.events.SelectionEvent;
+
+            override void widgetSelected(SelectionEvent e)
+            {
+                auto dialog = new DirectoryDialog(shell);
+                auto path = dialog.open();
+                folderText.setText(path);
+            }
+        }
+    }
+
+    openFolderButton.addSelectionListener(new FolderSelectionAdapter!());
+
     // 2nd row
     auto searchLabel = new Label(shell, SWT.NULL);
     searchLabel.setText("Search:");
@@ -56,7 +75,7 @@ void main()
     }
 
     // Fill dummy table data
-    foreach (i; 0..6)
+    foreach (i; 0 .. 6)
     {
         auto item = new TableItem(resultTable, SWT.NULL);
         string[] data = ["Dummy Name", "Dummy Location", "Dummy Size", "Dummy Last mod"];
