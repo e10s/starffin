@@ -166,9 +166,32 @@ void main()
         searchButton.addSelectionListener(new SearchSelectionAdapter);
     }
 
+    void setTextKeyAdapter(Text text)
+    {
+        import org.eclipse.swt.events.KeyAdapter;
+
+        class TextKeyAdapter : KeyAdapter
+        {
+            import org.eclipse.swt.events.KeyEvent;
+
+            override void keyReleased(KeyEvent e)
+            {
+                if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR)
+                {
+                    searchImpl();
+                }
+            }
+        }
+
+        text.addKeyListener(new TextKeyAdapter);
+
+    }
+
     setFolderDropTargetAdapter();
     setFolderSelectionAdapter();
     setSearchSelectionAdapter();
+    setTextKeyAdapter(folderText);
+    setTextKeyAdapter(searchText);
 
     shell.pack();
     shell.open();
