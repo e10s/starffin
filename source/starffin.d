@@ -30,7 +30,6 @@ void main()
     searchLabel.setText("Search:");
 
     auto searchText = new Text(shell, SWT.SINGLE | SWT.BORDER);
-    searchText.setText("partial_name");
     auto gd = new GridData(GridData.FILL_HORIZONTAL);
     gd.horizontalSpan = 2;
     searchText.setLayoutData(gd);
@@ -48,6 +47,7 @@ void main()
     resultTable.setLinesVisible(true);
     gd = new GridData(GridData.FILL_BOTH);
     gd.horizontalSpan = 3;
+    gd.heightHint = 400;
     resultTable.setLayoutData(gd);
 
     foreach (e; ["Name", "Location", "Size", "Last modified"])
@@ -55,14 +55,6 @@ void main()
         auto col = new TableColumn(resultTable, SWT.LEFT);
         col.setText(e);
         col.setWidth(100);
-    }
-
-    // Fill dummy table data
-    foreach (i; 0 .. 6)
-    {
-        auto item = new TableItem(resultTable, SWT.NULL);
-        string[] data = ["Dummy Name", "Dummy Location", "Dummy Size", "Dummy Last mod"];
-        item.setText(data);
     }
 
     void setFolderDropTargetAdapter()
@@ -117,6 +109,46 @@ void main()
         openFolderButton.addSelectionListener(new FolderSelectionAdapter);
     }
 
+    void searchImpl()
+    {
+        import std.file;
+
+        auto dirPath = folderText.getText();
+        if (!exists(dirPath) || !isDir(dirPath))
+        {
+            auto mb = new MessageBox(shell, SWT.ICON_ERROR);
+            mb.setText(name);
+            import std.format;
+
+            mb.setMessage(format(`"%s" is not a valid folder path.`, dirPath));
+            mb.open();
+            return;
+        }
+
+        resultTable.removeAll();
+
+        import std.uni;
+
+        auto partialName = searchText.getText().toLower;
+
+        foreach (DirEntry entry; dirEntries(dirPath, SpanMode.shallow))
+        {
+            import std.algorithm.searching;
+            import std.path;
+
+            auto itemName = baseName(entry.name);
+            if (itemName.toLower.canFind(partialName))
+            {
+                import std.conv;
+                import std.datetime.systime;
+
+                auto item = new TableItem(resultTable, SWT.NULL);
+                item.setText([itemName, dirName(entry.name), to!string(entry.size),
+                        entry.timeLastModified.toISOExtString()]);
+            }
+        }
+    }
+
     void setSearchSelectionAdapter()
     {
         import org.eclipse.swt.events.SelectionAdapter;
@@ -127,19 +159,7 @@ void main()
 
             override void widgetSelected(SelectionEvent e)
             {
-                import std.file;
-
-                auto dirName = folderText.getText();
-                if (!exists(dirName) || !isDir(dirName))
-                {
-                    auto mb = new MessageBox(shell, SWT.ICON_ERROR);
-                    mb.setText(name);
-                    import std.format;
-
-                    mb.setMessage(format(`"%s" is not a valid folder path.`, dirName));
-                    mb.open();
-                    return;
-                }
+                searchImpl();
             }
         }
 
