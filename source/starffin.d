@@ -115,6 +115,37 @@ void main()
         item.setText(data);
     }
 
+    void setSearchSelectionAdapter()
+    {
+        import org.eclipse.swt.events.SelectionAdapter;
+
+        class SearchSelectionAdapter : SelectionAdapter
+        {
+            import org.eclipse.swt.events.SelectionEvent;
+
+            override void widgetSelected(SelectionEvent e)
+            {
+                import std.file;
+
+                auto dirName = folderText.getText();
+                if (!exists(dirName) || !isDir(dirName))
+                {
+                    auto mb = new MessageBox(shell, SWT.ICON_ERROR);
+                    mb.setText(name);
+                    import std.format;
+
+                    mb.setMessage(format(`"%s" is not a valid folder path.`, dirName));
+                    mb.open();
+                    return;
+                }
+            }
+        }
+
+        searchButton.addSelectionListener(new SearchSelectionAdapter);
+    }
+
+    setSearchSelectionAdapter();
+
     shell.pack();
     shell.open();
 
