@@ -19,61 +19,11 @@ void main()
     folderLabel.setText("Folder:");
 
     auto folderText = new Text(shell, SWT.SINGLE | SWT.BORDER);
-
     folderText.setText(getcwd());
     folderText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-    import org.eclipse.swt.dnd.all;
-
-    class FolderDropTargetAdapter : DropTargetAdapter
-    {
-        override void dragEnter(DropTargetEvent e)
-        {
-            e.detail = DND.DROP_COPY;
-        }
-
-        override void drop(DropTargetEvent e)
-        {
-            import java.lang.wrappers;
-            import std.array;
-
-            auto dropped = e.data.stringArrayFromObject;
-            if (!dropped.empty)
-            {
-                folderText.setText(dropped.front);
-            }
-        }
-    }
-
-    auto target = new DropTarget(folderText, DND.DROP_DEFAULT | DND.DROP_COPY);
-    target.setTransfer([cast(Transfer) FileTransfer.getInstance()]);
-    target.addDropListener(new FolderDropTargetAdapter);
-
     auto openFolderButton = new Button(shell, SWT.NULL);
     openFolderButton.setText("...");
-
-    template FolderSelectionAdapter()
-    {
-        import org.eclipse.swt.events.SelectionAdapter;
-
-        class FolderSelectionAdapter : SelectionAdapter
-        {
-            import org.eclipse.swt.events.SelectionEvent;
-
-            override void widgetSelected(SelectionEvent e)
-            {
-                auto dialog = new DirectoryDialog(shell);
-                dialog.setFilterPath(folderText.getText());
-                auto path = dialog.open();
-                if (path)
-                {
-                    folderText.setText(path);
-                }
-            }
-        }
-    }
-
-    openFolderButton.addSelectionListener(new FolderSelectionAdapter!());
 
     // 2nd row
     auto searchLabel = new Label(shell, SWT.NULL);
@@ -115,6 +65,58 @@ void main()
         item.setText(data);
     }
 
+    void setFolderDropTargetAdapter()
+    {
+        import org.eclipse.swt.dnd.all;
+
+        class FolderDropTargetAdapter : DropTargetAdapter
+        {
+            override void dragEnter(DropTargetEvent e)
+            {
+                e.detail = DND.DROP_COPY;
+            }
+
+            override void drop(DropTargetEvent e)
+            {
+                import java.lang.wrappers;
+                import std.array;
+
+                auto dropped = e.data.stringArrayFromObject;
+                if (!dropped.empty)
+                {
+                    folderText.setText(dropped.front);
+                }
+            }
+        }
+
+        auto target = new DropTarget(folderText, DND.DROP_DEFAULT | DND.DROP_COPY);
+        target.setTransfer([cast(Transfer) FileTransfer.getInstance()]);
+        target.addDropListener(new FolderDropTargetAdapter);
+    }
+
+    void setFolderSelectionAdapter()
+    {
+        import org.eclipse.swt.events.SelectionAdapter;
+
+        class FolderSelectionAdapter : SelectionAdapter
+        {
+            import org.eclipse.swt.events.SelectionEvent;
+
+            override void widgetSelected(SelectionEvent e)
+            {
+                auto dialog = new DirectoryDialog(shell);
+                dialog.setFilterPath(folderText.getText());
+                auto path = dialog.open();
+                if (path)
+                {
+                    folderText.setText(path);
+                }
+            }
+        }
+
+        openFolderButton.addSelectionListener(new FolderSelectionAdapter);
+    }
+
     void setSearchSelectionAdapter()
     {
         import org.eclipse.swt.events.SelectionAdapter;
@@ -144,6 +146,8 @@ void main()
         searchButton.addSelectionListener(new SearchSelectionAdapter);
     }
 
+    setFolderDropTargetAdapter();
+    setFolderSelectionAdapter();
     setSearchSelectionAdapter();
 
     shell.pack();
