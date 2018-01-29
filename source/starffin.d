@@ -131,10 +131,13 @@ void main()
         resultTable.removeAll();
 
         import std.uni;
+        import std.range;
+        import std.algorithm.iteration : filter;
 
         auto partialName = searchText.getText().toLower;
-
-        foreach (DirEntry entry; dirEntries(dirPath, SpanMode.shallow))
+        auto de = dirEntries(dirPath, SpanMode.shallow).array;
+        auto de2 = de.filter!(a => a.isDir).chain(de.filter!(a => a.isFile));
+        foreach (DirEntry entry; de2)
         {
             import std.algorithm.searching;
             import std.path;
