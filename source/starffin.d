@@ -50,11 +50,14 @@ void main()
     gd.heightHint = 400;
     resultTable.setLayoutData(gd);
 
-    foreach (e; ["Name", "Location", "Size", "Last modified"])
+    import std.typecons : tuple;
+
+    foreach (t; [tuple("Name", 120, true), tuple("Location", 180, true),
+            tuple("Size", 100, false), tuple("Last modified", 210, true)])
     {
-        auto col = new TableColumn(resultTable, SWT.LEFT);
-        col.setText(e);
-        col.setWidth(100);
+        auto col = new TableColumn(resultTable, t[2] ? SWT.LEFT : SWT.RIGHT);
+        col.setText(t[0]);
+        col.setWidth(t[1]);
     }
 
     void setFolderDropTargetAdapter()
