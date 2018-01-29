@@ -53,7 +53,7 @@ void main()
     import std.typecons : tuple;
 
     foreach (t; [tuple("Name", 120, true), tuple("Location", 180, true),
-            tuple("Size", 100, false), tuple("Last modified", 210, true)])
+            tuple("Size", 100, false), tuple("Last modified", 140, true)])
     {
         auto col = new TableColumn(resultTable, t[2] ? SWT.LEFT : SWT.RIGHT);
         col.setText(t[0]);
@@ -142,12 +142,14 @@ void main()
             auto itemName = baseName(entry.name);
             if (itemName.toLower.canFind(partialName))
             {
-                import std.conv;
                 import std.datetime.systime;
+                import std.format;
 
+                immutable t = entry.timeLastModified;
                 auto item = new TableItem(resultTable, SWT.NULL);
-                item.setText([itemName, dirName(entry.name), to!string(entry.size),
-                        entry.timeLastModified.toISOExtString()]);
+                item.setText([itemName, dirName(entry.name), format!"%,d"(entry.size),
+                        format!"%d/%02d/%02d %d:%02d:%02d"(t.year, t.month,
+                            t.day, t.hour, t.minute, t.second)]);
             }
         }
     }
