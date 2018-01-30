@@ -168,11 +168,12 @@ void main()
                     import std.datetime.systime;
                     import std.format;
 
+                    immutable s = entry.size;
                     immutable t = entry.timeLastModified;
                     auto item = new TableItem(resultTable, SWT.NULL);
-                    item.setText([itemName, dirName(entry.name), format!"%,d"(entry.size),
-                            format!"%d/%02d/%02d %d:%02d:%02d"(t.year, t.month,
-                                t.day, t.hour, t.minute, t.second)]);
+                    item.setText([itemName, dirName(entry.name),
+                            format!"%,d KB"(s / 1024 + (s % 1024 && 1)), format!"%d/%02d/%02d %d:%02d:%02d"(t.year,
+                                t.month, t.day, t.hour, t.minute, t.second)]);
                 }
             }
 
