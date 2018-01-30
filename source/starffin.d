@@ -2,8 +2,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.all;
 import org.eclipse.swt.widgets.all;
 
-import std.file;
-
 void main()
 {
     immutable name = "Starffin";
@@ -17,6 +15,8 @@ void main()
     // 1st row
     auto folderLabel = new Label(shell, SWT.NULL);
     folderLabel.setText("Folder:");
+
+    import std.file : getcwd;
 
     auto folderText = new Text(shell, SWT.SINGLE | SWT.BORDER);
     folderText.setText(getcwd());
@@ -62,19 +62,24 @@ void main()
 
     void setFolderDropTargetAdapter()
     {
-        import org.eclipse.swt.dnd.all;
+        import org.eclipse.swt.dnd.DropTargetAdapter;
+        import org.eclipse.swt.dnd.DND;
 
         class FolderDropTargetAdapter : DropTargetAdapter
         {
+
+            import org.eclipse.swt.dnd.DropTargetEvent;
+
             override void dragEnter(DropTargetEvent e)
             {
+
                 e.detail = DND.DROP_COPY;
             }
 
             override void drop(DropTargetEvent e)
             {
-                import java.lang.wrappers;
-                import std.array;
+                import java.lang.wrappers : stringArrayFromObject;
+                import std.array : empty, front;
 
                 auto dropped = e.data.stringArrayFromObject;
                 if (!dropped.empty)
@@ -83,6 +88,10 @@ void main()
                 }
             }
         }
+
+        import org.eclipse.swt.dnd.DropTarget;
+        import org.eclipse.swt.dnd.FileTransfer;
+        import org.eclipse.swt.dnd.Transfer;
 
         auto target = new DropTarget(folderText, DND.DROP_DEFAULT | DND.DROP_COPY);
         target.setTransfer([cast(Transfer) FileTransfer.getInstance()]);
@@ -114,15 +123,16 @@ void main()
 
     void searchImpl()
     {
-        import std.file;
-
         auto dirPath = folderText.getText();
+
+        import std.file : exists, isDir;
+
         if (!exists(dirPath) || !isDir(dirPath))
         {
+            import std.format : format;
+
             auto mb = new MessageBox(shell, SWT.ICON_ERROR);
             mb.setText(name);
-            import std.format;
-
             mb.setMessage(format(`"%s" is not a valid folder path.`, dirPath));
             mb.open();
             return;
@@ -133,6 +143,7 @@ void main()
         void buildTableItems(string dirPath, size_t depth)
         {
             import std.algorithm.iteration : filter;
+            import std.file : DirEntry, FileException;
             import std.range : array, chain, empty;
             import std.uni : toLower;
 
@@ -140,6 +151,7 @@ void main()
             DirEntry[] de;
             try
             {
+                import std.file : dirEntries, SpanMode;
 
                 de = dirEntries(dirPath, SpanMode.shallow).array;
             }
@@ -166,7 +178,7 @@ void main()
                 if (itemName.toLower.canFind(partialName))
                 {
                     import std.datetime.systime;
-                    import std.format;
+                    import std.format : format;
 
                     immutable s = entry.size;
                     immutable t = entry.timeLastModified;
