@@ -130,31 +130,59 @@ void main()
 
         resultTable.removeAll();
 
-        import std.uni;
-        import std.range;
-        import std.algorithm.iteration : filter;
-
-        auto partialName = searchText.getText().toLower;
-        auto de = dirEntries(dirPath, SpanMode.shallow).array;
-        auto de2 = de.filter!(a => a.isDir).chain(de.filter!(a => a.isFile));
-        foreach (DirEntry entry; de2)
+        void buildTableItems(string dirPath, size_t depth)
         {
-            import std.algorithm.searching;
-            import std.path;
+            import std.algorithm.iteration : filter;
+            import std.range : array, chain, empty;
+            import std.uni : toLower;
 
-            auto itemName = baseName(entry.name);
-            if (itemName.toLower.canFind(partialName))
+            auto partialName = searchText.getText().toLower;
+            DirEntry[] de;
+            try
             {
-                import std.datetime.systime;
-                import std.format;
 
-                immutable t = entry.timeLastModified;
-                auto item = new TableItem(resultTable, SWT.NULL);
-                item.setText([itemName, dirName(entry.name), format!"%,d"(entry.size),
-                        format!"%d/%02d/%02d %d:%02d:%02d"(t.year, t.month,
-                            t.day, t.hour, t.minute, t.second)]);
+                de = dirEntries(dirPath, SpanMode.shallow).array;
+            }
+            catch (FileException ex)
+            {
+                import std.stdio : stderr, writeln;
+
+                stderr.writeln("Skip: ", dirPath);
+            }
+
+            if (de.empty)
+            {
+                return;
+            }
+
+            auto folders = de.filter!(a => a.isDir);
+            auto files = de.filter!(a => a.isFile);
+            foreach (DirEntry entry; chain(folders, files))
+            {
+                import std.algorithm.searching : canFind;
+                import std.path : baseName, dirName;
+
+                auto itemName = baseName(entry.name);
+                if (itemName.toLower.canFind(partialName))
+                {
+                    import std.datetime.systime;
+                    import std.format;
+
+                    immutable t = entry.timeLastModified;
+                    auto item = new TableItem(resultTable, SWT.NULL);
+                    item.setText([itemName, dirName(entry.name), format!"%,d"(entry.size),
+                            format!"%d/%02d/%02d %d:%02d:%02d"(t.year, t.month,
+                                t.day, t.hour, t.minute, t.second)]);
+                }
+            }
+
+            foreach (f; folders)
+            {
+                buildTableItems(f.name, depth + 1);
             }
         }
+
+        buildTableItems(dirPath, 0);
     }
 
     void setSearchSelectionAdapter()
