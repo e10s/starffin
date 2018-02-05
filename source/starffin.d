@@ -259,11 +259,55 @@ class GUI
             text.addKeyListener(new TextKeyAdapter);
         }
 
+        void setResultTableKeyAdapter()
+        {
+            import org.eclipse.swt.events.KeyAdapter;
+
+            class ResultTableKeyAdapter : KeyAdapter
+            {
+                import org.eclipse.swt.events.KeyEvent;
+
+                override void keyReleased(KeyEvent e)
+                {
+                    if (e.keyCode == SWT.DEL)
+                    {
+                        import std.algorithm.iteration : map;
+                        import std.path : buildPath;
+                        import std.range : array;
+
+                        auto indices = resultTable.getSelectionIndices();
+                        auto paths = resultTable.getSelection()
+                            .map!(a => buildPath(a.getText(1), a.getText(0))).array;
+
+                        resultTable.remove(indices);
+                        foreach (path; paths)
+                        {
+                            try
+                            {
+                                import trashcan : moveToTrash;
+
+                                moveToTrash(path);
+                            }
+                            catch (Exception ex)
+                            {
+                                import std.stdio : stderr, writefln;
+
+                                stderr.writefln("%s: %s", ex.msg, path);
+                            }
+                        }
+                    }
+                }
+            }
+
+            resultTable.addKeyListener(new ResultTableKeyAdapter);
+        }
+
         setFolderDropTargetAdapter();
         setFolderSelectionAdapter();
         setSearchSelectionAdapter();
         setTextKeyAdapter(folderText);
         setTextKeyAdapter(searchText);
+        setResultTableKeyAdapter();
     }
 }
 
