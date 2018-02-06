@@ -6,17 +6,35 @@ immutable name = "Starffin";
 
 class ShellWrapper
 {
+    import org.eclipse.swt.widgets.Composite;
     import org.eclipse.swt.widgets.Display;
     import org.eclipse.swt.widgets.Shell;
 
     Shell shell;
+    Composite mainView, statusBar;
     this()
     {
+        import org.eclipse.swt.layout.GridData;
         import org.eclipse.swt.layout.GridLayout;
 
         shell = new Shell(new Display);
         shell.setText(name);
-        shell.setLayout(new GridLayout(3, false));
+
+        auto gl = new GridLayout(1, false);
+        gl.marginHeight = 0;
+        gl.marginWidth = 0;
+        gl.verticalSpacing = 0;
+        shell.setLayout(gl);
+
+        mainView = new Composite(shell, SWT.NULL);
+        mainView.setLayoutData(new GridData(GridData.FILL_BOTH));
+        gl = new GridLayout(3, false);
+        mainView.setLayout(gl);
+
+        statusBar = new Composite(shell, SWT.NULL | SWT.BORDER);
+        statusBar.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        gl = new GridLayout(3, false);
+        statusBar.setLayout(gl);
     }
 
     alias shell this;
@@ -26,24 +44,23 @@ class ShellWrapper
 class Row1
 {
     import org.eclipse.swt.widgets.Button;
-    import org.eclipse.swt.widgets.Shell;
     import org.eclipse.swt.widgets.Text;
 
     Text folderText;
     Button openFolderButton;
-    this(Shell shell)
+    this(C)(C parent)
     {
         import org.eclipse.swt.layout.GridData;
         import org.eclipse.swt.widgets.Label;
         import std.file : getcwd;
 
-        new Label(shell, SWT.NULL).setText("Folder:");
+        new Label(parent, SWT.NULL).setText("Folder:");
 
-        folderText = new Text(shell, SWT.SINGLE | SWT.BORDER);
+        folderText = new Text(parent, SWT.SINGLE | SWT.BORDER);
         folderText.setText(getcwd());
         folderText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-        openFolderButton = new Button(shell, SWT.NULL);
+        openFolderButton = new Button(parent, SWT.NULL);
         openFolderButton.setText("...");
     }
 }
@@ -51,18 +68,17 @@ class Row1
 // 2nd row
 class Row2
 {
-    import org.eclipse.swt.widgets.Shell;
     import org.eclipse.swt.widgets.Text;
 
     Text searchText;
-    this(Shell shell)
+    this(C)(C parent)
     {
         import org.eclipse.swt.layout.GridData;
         import org.eclipse.swt.widgets.Label;
 
-        new Label(shell, SWT.NULL).setText("Search:");
+        new Label(parent, SWT.NULL).setText("Search:");
 
-        searchText = new Text(shell, SWT.SINGLE | SWT.BORDER);
+        searchText = new Text(parent, SWT.SINGLE | SWT.BORDER);
         auto gd = new GridData(GridData.FILL_HORIZONTAL);
         gd.horizontalSpan = 2;
         searchText.setLayoutData(gd);
@@ -73,14 +89,13 @@ class Row2
 class Row3
 {
     import org.eclipse.swt.widgets.Button;
-    import org.eclipse.swt.widgets.Shell;
 
     Button searchButton;
-    this(Shell shell)
+    this(C)(C parent)
     {
         import org.eclipse.swt.layout.GridData;
 
-        searchButton = new Button(shell, SWT.NULL);
+        searchButton = new Button(parent, SWT.NULL);
         searchButton.setText("Search");
         auto gd = new GridData(GridData.HORIZONTAL_ALIGN_END);
         gd.horizontalSpan = 3;
@@ -91,15 +106,15 @@ class Row3
 // 4th row
 class Row4
 {
-    import org.eclipse.swt.widgets.Shell;
+    //import org.eclipse.swt.widgets.Shell;
     import org.eclipse.swt.widgets.Table;
 
     Table resultTable;
-    this(Shell shell)
+    this(C)(C parent)
     {
         import org.eclipse.swt.layout.GridData;
 
-        resultTable = new Table(shell, SWT.MULTI | SWT.FULL_SELECTION | SWT.BORDER);
+        resultTable = new Table(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.BORDER);
         resultTable.setHeaderVisible(true);
         resultTable.setLinesVisible(true);
         auto gd = new GridData(GridData.FILL_BOTH);
@@ -131,10 +146,37 @@ class Row4
     }
 }
 
+// 5th row
+class Row5
+{
+    import org.eclipse.swt.widgets.Label;
+
+    Label statusLabel1, statusLabel2;
+
+    this(C)(C parent)
+    {
+        import org.eclipse.swt.layout.GridData;
+
+        statusLabel1 = new Label(parent, SWT.NULL);
+        statusLabel1.setText("STATUS LABEL 1");
+        statusLabel1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+
+        auto sep = new Label(parent, SWT.SEPARATOR);
+        auto gd = new GridData(SWT.END, SWT.CENTER, false, true);
+        gd.heightHint = statusLabel1.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+        sep.setLayoutData(gd);
+
+        statusLabel2 = new Label(parent, SWT.NULL);
+        statusLabel2.setText("STATUS LABEL 2");
+        statusLabel2.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, true));
+    }
+}
+
 class GUI
 {
     import org.eclipse.swt.widgets.Button;
     import org.eclipse.swt.widgets.Display;
+    import org.eclipse.swt.widgets.Label;
     import org.eclipse.swt.widgets.Shell;
     import org.eclipse.swt.widgets.Text;
     import org.eclipse.swt.widgets.Table;
@@ -144,16 +186,21 @@ class GUI
     Text folderText, searchText;
     Button openFolderButton, searchButton;
     Table resultTable;
+    Label statusLabel1, statusLabel2;
     this()
     {
-        shell = new ShellWrapper;
+        auto shellWrapper = new ShellWrapper;
+        shell = shellWrapper.shell;
         display = shell.getDisplay();
-        auto r1 = new Row1(shell);
+        auto r1 = new Row1(shellWrapper.mainView);
         folderText = r1.folderText;
         openFolderButton = r1.openFolderButton;
-        searchText = new Row2(shell).searchText;
-        searchButton = new Row3(shell).searchButton;
-        resultTable = new Row4(shell).resultTable;
+        searchText = new Row2(shellWrapper.mainView).searchText;
+        searchButton = new Row3(shellWrapper.mainView).searchButton;
+        resultTable = new Row4(shellWrapper.mainView).resultTable;
+        auto r5 = new Row5(shellWrapper.statusBar);
+        statusLabel1 = r5.statusLabel1;
+        statusLabel2 = r5.statusLabel2;
 
         setAdapters();
     }
