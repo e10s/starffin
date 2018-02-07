@@ -114,7 +114,7 @@ class Row4
     {
         import org.eclipse.swt.layout.GridData;
 
-        resultTable = new Table(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.BORDER);
+        resultTable = new Table(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.BORDER | SWT.VIRTUAL);
         resultTable.setHeaderVisible(true);
         resultTable.setLinesVisible(true);
         auto gd = new GridData(GridData.FILL_BOTH);
@@ -180,13 +180,16 @@ class GUI
     import org.eclipse.swt.widgets.Shell;
     import org.eclipse.swt.widgets.Text;
     import org.eclipse.swt.widgets.Table;
+    import std.array : Appender;
 
     Shell shell;
     Display display;
     Text folderText, searchText;
     Button openFolderButton, searchButton;
     Table resultTable;
+    Appender!(string[][]) resultTableData;
     Label statusLabel1, statusLabel2;
+
     this()
     {
         auto shellWrapper = new ShellWrapper;
@@ -326,7 +329,7 @@ class GUI
                         auto paths = resultTable.getSelection()
                             .map!(a => buildPath(a.getText(1), a.getText(0))).array;
 
-                        resultTable.remove(indices);
+                        resultTable.remove(indices); // XXX: DWT requires a patch from https://bugs.eclipse.org/bugs/show_bug.cgi?id=142593
                         foreach (path; paths)
                         {
                             try
@@ -349,12 +352,34 @@ class GUI
             resultTable.addKeyListener(new ResultTableKeyAdapter);
         }
 
+        void setResultTableSetDataListener()
+        {
+            import org.eclipse.swt.widgets.Listener;
+
+            class ResultTableSetDataListener : Listener
+            {
+                import org.eclipse.swt.widgets.Event;
+
+                void handleEvent(Event e)
+                {
+                    import org.eclipse.swt.widgets.TableItem;
+
+                    auto item = cast(TableItem) e.item;
+                    int index = resultTable.indexOf(item);
+                    item.setText(resultTableData.data[index]);
+                }
+            }
+
+            resultTable.addListener(SWT.SetData, new ResultTableSetDataListener);
+        }
+
         setFolderDropTargetAdapter();
         setFolderSelectionAdapter();
         setSearchSelectionAdapter();
         setTextKeyAdapter(folderText);
         setTextKeyAdapter(searchText);
         setResultTableKeyAdapter();
+        setResultTableSetDataListener();
     }
 }
 
@@ -362,14 +387,12 @@ import std.file : DirEntry;
 
 void addTableItem(GUI gui, DirEntry entry)
 {
-    import org.eclipse.swt.widgets.TableItem;
     import std.format : format;
     import std.path : baseName, dirName;
 
     immutable s = entry.size;
     immutable t = entry.timeLastModified;
-    auto item = new TableItem(gui.resultTable, SWT.NULL);
-    item.setText([baseName(entry.name), dirName(entry.name),
+    gui.resultTableData.put([baseName(entry.name), dirName(entry.name),
             format!"%,d KB"(s / 1024 + (s % 1024 && 1)), format!"%d/%02d/%02d %d:%02d:%02d"(t.year,
                 t.month, t.day, t.hour, t.minute, t.second)]);
 }
@@ -402,6 +425,7 @@ void searchImpl(GUI gui)
     }
 
     gui.resultTable.removeAll();
+    gui.resultTableData.clear();
 
     import std.uni : toLower;
 
@@ -454,6 +478,8 @@ void searchImpl(GUI gui)
     }
 
     dig(folderPath, 0);
+
+    gui.resultTable.setItemCount(cast(int) gui.resultTableData.data.length);
 }
 
 void main()
