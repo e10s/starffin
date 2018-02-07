@@ -151,7 +151,7 @@ class Row5
 {
     import org.eclipse.swt.widgets.Label;
 
-    Label statusLabel1, statusLabel2;
+    Label statusLabel1, showingLabel;
 
     this(C)(C parent)
     {
@@ -166,9 +166,8 @@ class Row5
         gd.heightHint = statusLabel1.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
         sep.setLayoutData(gd);
 
-        statusLabel2 = new Label(parent, SWT.NULL);
-        statusLabel2.setText("STATUS LABEL 2");
-        statusLabel2.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, true));
+        showingLabel = new Label(parent, SWT.NULL);
+        showingLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, true));
     }
 }
 
@@ -188,7 +187,7 @@ class GUI
     Button openFolderButton, searchButton;
     Table resultTable;
     Appender!(string[][]) resultTableData;
-    Label statusLabel1, statusLabel2;
+    Label statusLabel1, showingLabel;
 
     this()
     {
@@ -203,9 +202,10 @@ class GUI
         resultTable = new Row4(shellWrapper.mainView).resultTable;
         auto r5 = new Row5(shellWrapper.statusBar);
         statusLabel1 = r5.statusLabel1;
-        statusLabel2 = r5.statusLabel2;
+        showingLabel = r5.showingLabel;
 
         setAdapters();
+        updateShowingLabel(this);
     }
 
     private void setAdapters()
@@ -330,6 +330,8 @@ class GUI
                             .map!(a => buildPath(a.getText(1), a.getText(0))).array;
 
                         resultTable.remove(indices); // XXX: DWT requires a patch from https://bugs.eclipse.org/bugs/show_bug.cgi?id=142593
+                        updateShowingLabel(this.outer);
+
                         foreach (path; paths)
                         {
                             try
@@ -367,6 +369,8 @@ class GUI
                     auto item = cast(TableItem) e.item;
                     int index = resultTable.indexOf(item);
                     item.setText(resultTableData.data[index]);
+
+                    updateShowingLabel(this.outer);
                 }
             }
 
@@ -381,6 +385,14 @@ class GUI
         setResultTableKeyAdapter();
         setResultTableSetDataListener();
     }
+}
+
+void updateShowingLabel(GUI gui)
+{
+    import std.format : format;
+
+    gui.showingLabel.setText(format!"Showing: %s"(gui.resultTable.getItemCount()));
+    gui.showingLabel.getParent().layout();
 }
 
 import std.file : DirEntry;
