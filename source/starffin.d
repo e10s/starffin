@@ -2,6 +2,11 @@ module starffin;
 
 import org.eclipse.swt.SWT;
 
+debug
+{
+    version = Starffin_NoFileDeletion;
+}
+
 immutable name = "Starffin";
 
 class ShellWrapper
@@ -355,9 +360,19 @@ class GUI
                         {
                             try
                             {
-                                import trashcan : moveToTrash;
+                                version (Starffin_NoFileDeletion)
+                                {
+                                    import std.stdio : stderr, writefln;
 
-                                moveToTrash(path);
+                                    stderr.writefln("Deletion of these files is not performed: %s",
+                                            paths);
+                                }
+                                else
+                                {
+                                    import trashcan : moveToTrash;
+
+                                    moveToTrash(path);
+                                }
                             }
                             catch (Exception ex)
                             {
