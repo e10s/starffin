@@ -323,7 +323,7 @@ class GUI
                     {
                         import std.algorithm.iteration : filter, map;
                         import std.algorithm.searching : canFind;
-                        import std.array : empty;
+                        import std.array : empty, front;
                         import std.path : buildPath;
                         import std.range : enumerate, array;
 
@@ -343,6 +343,11 @@ class GUI
                         resultTableData.put(newData);
                         resultTable.removeAll();
                         resultTable.setItemCount(cast(int) resultTableData.data.length);
+
+                        import std.algorithm.comparison : min;
+
+                        immutable maxIdx = cast(int) resultTable.getItemCount() - 1;
+                        resultTable.setSelection(min(maxIdx, indices.front));
 
                         updateShowingLabel(this.outer);
 
