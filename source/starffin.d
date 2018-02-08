@@ -322,6 +322,13 @@ class GUI
             {
                 import org.eclipse.swt.events.KeyEvent;
 
+                override void keyPressed(KeyEvent e)
+                {
+                    if (e.stateMask == SWT.CTRL && e.keyCode == 'a')
+                    {
+                        resultTable.selectAll();
+                    }
+                }
                 override void keyReleased(KeyEvent e)
                 {
                     if (e.keyCode == SWT.DEL)
