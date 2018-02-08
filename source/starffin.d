@@ -321,15 +321,29 @@ class GUI
                 {
                     if (e.keyCode == SWT.DEL)
                     {
-                        import std.algorithm.iteration : map;
+                        import std.algorithm.iteration : filter, map;
+                        import std.algorithm.searching : canFind;
+                        import std.array : empty;
                         import std.path : buildPath;
-                        import std.range : array;
+                        import std.range : enumerate, array;
 
                         auto indices = resultTable.getSelectionIndices();
+
+                        if (indices.empty)
+                        {
+                            return;
+                        }
+
                         auto paths = resultTable.getSelection()
                             .map!(a => buildPath(a.getText(1), a.getText(0))).array;
 
-                        resultTable.remove(indices); // XXX: DWT requires a patch from https://bugs.eclipse.org/bugs/show_bug.cgi?id=142593
+                        auto newData = resultTableData.data.enumerate.filter!(a => !indices.canFind(a.index))
+                            .map!(a => a.value).array;
+                        resultTableData.clear();
+                        resultTableData.put(newData);
+                        resultTable.removeAll();
+                        resultTable.setItemCount(cast(int) resultTableData.data.length);
+
                         updateShowingLabel(this.outer);
 
                         foreach (path; paths)
