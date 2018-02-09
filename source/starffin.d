@@ -156,19 +156,19 @@ class Row5
 {
     import org.eclipse.swt.widgets.Label;
 
-    Label statusLabel1, showingLabel;
+    Label statusLabel, showingLabel;
 
     this(C)(C parent)
     {
         import org.eclipse.swt.layout.GridData;
 
-        statusLabel1 = new Label(parent, SWT.NULL);
-        statusLabel1.setText("STATUS LABEL 1");
-        statusLabel1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+        statusLabel = new Label(parent, SWT.NULL);
+        statusLabel.setText("Ready");
+        statusLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 
         auto sep = new Label(parent, SWT.SEPARATOR);
         auto gd = new GridData(SWT.END, SWT.CENTER, false, true);
-        gd.heightHint = statusLabel1.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+        gd.heightHint = statusLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
         sep.setLayoutData(gd);
 
         showingLabel = new Label(parent, SWT.NULL);
@@ -188,11 +188,11 @@ class GUI
 
     Shell shell;
     Display display;
-    Text folderText, searchText;
-    Button openFolderButton, searchButton;
-    Table resultTable;
-    Appender!(string[][]) resultTableData;
-    Label statusLabel1, showingLabel;
+    private Text folderText, searchText;
+    private Button openFolderButton, searchButton;
+    private Table resultTable;
+    private Appender!(string[][]) resultTableData;
+    private Label statusLabel, showingLabel;
 
     this()
     {
@@ -206,11 +206,11 @@ class GUI
         searchButton = new Row3(shellWrapper.mainView).searchButton;
         resultTable = new Row4(shellWrapper.mainView).resultTable;
         auto r5 = new Row5(shellWrapper.statusBar);
-        statusLabel1 = r5.statusLabel1;
+        statusLabel = r5.statusLabel;
         showingLabel = r5.showingLabel;
 
         setAdapters();
-        updateShowingLabel(this);
+        updateShowingLabel();
     }
 
     private void setAdapters()
@@ -287,7 +287,7 @@ class GUI
 
                 override void widgetSelected(SelectionEvent e)
                 {
-                    searchImpl(this.outer);
+                    search();
                 }
             }
 
@@ -306,7 +306,7 @@ class GUI
                 {
                     if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR)
                     {
-                        searchImpl(this.outer);
+                        search();
                     }
                 }
             }
@@ -363,17 +363,16 @@ class GUI
 
                         auto newData = resultTableData.data.enumerate.filter!(a => !indices.canFind(a.index))
                             .map!(a => a.value).array;
-                        resultTableData.clear();
+                        resetTableInfo();
                         resultTableData.put(newData);
-                        resultTable.removeAll();
-                        resultTable.setItemCount(cast(int) resultTableData.data.length);
+                        reflectTableInfo();
 
                         import std.algorithm.comparison : min;
 
                         immutable maxIdx = cast(int) resultTable.getItemCount() - 1;
                         resultTable.setSelection(min(maxIdx, indices.front));
 
-                        updateShowingLabel(this.outer);
+                        updateShowingLabel();
 
                         foreach (path; pathsToBeRemoved)
                         {
@@ -420,10 +419,9 @@ class GUI
                     import org.eclipse.swt.widgets.TableItem;
 
                     auto item = cast(TableItem) e.item;
-                    int index = resultTable.indexOf(item);
-                    item.setText(resultTableData.data[index]);
+                    item.setText(resultTableData.data[resultTable.indexOf(item)]);
 
-                    updateShowingLabel(this.outer);
+                    updateShowingLabel();
                 }
             }
 
@@ -438,113 +436,124 @@ class GUI
         setResultTableKeyAdapter();
         setResultTableSetDataListener();
     }
-}
 
-void updateShowingLabel(GUI gui)
-{
-    import std.format : format;
-
-    gui.showingLabel.setText(format!"Showing: %s"(gui.resultTable.getItemCount()));
-    gui.showingLabel.getParent().layout();
-}
-
-import std.file : DirEntry;
-
-void addTableItem(GUI gui, DirEntry entry)
-{
-    import std.format : format;
-    import std.path : baseName, dirName;
-
-    immutable s = entry.size;
-    immutable t = entry.timeLastModified;
-    gui.resultTableData.put([baseName(entry.name), dirName(entry.name),
-            format!"%,d KB"(s / 1024 + (s % 1024 && 1)), format!"%d/%02d/%02d %d:%02d:%02d"(t.year,
-                t.month, t.day, t.hour, t.minute, t.second)]);
-}
-
-void searchImpl(GUI gui)
-{
-    auto isValid(string folderPath)
+    private void reflectTableInfo()
     {
-        import std.file : exists, isDir;
-
-        if (!folderPath.exists || !folderPath.isDir)
-        {
-            import org.eclipse.swt.widgets.MessageBox;
-            import std.format : format;
-
-            auto mb = new MessageBox(gui.shell, SWT.ICON_ERROR);
-            mb.setText(name);
-            mb.setMessage(format!`"%s" is not a valid folder path.`(folderPath));
-            mb.open();
-            return false;
-        }
-        return true;
+        resultTable.setItemCount(cast(int) resultTableData.data.length);
     }
 
-    immutable folderPath = gui.folderText.getText();
-
-    if (!isValid(folderPath))
+    private void resetTableInfo()
     {
-        return;
+        resultTable.removeAll();
+        resultTableData.clear();
+        updateShowingLabel();
     }
 
-    gui.resultTable.removeAll();
-    gui.resultTableData.clear();
-
-    import std.uni : toLower;
-
-    immutable partialName = gui.searchText.getText().toLower;
-
-    void dig(string folderPath, size_t depth)
+    private void updateShowingLabel()
     {
-        import std.algorithm.iteration : filter;
-        import std.file : DirEntry, FileException;
+        import std.format : format;
 
-        DirEntry[] de;
-        try
+        showingLabel.setText(format!"Showing: %s"(resultTable.getItemCount()));
+        showingLabel.getParent().layout();
+    }
+
+    import std.file : DirEntry;
+
+    private void reserveTableItem(DirEntry entry)
+    {
+        import std.format : format;
+        import std.path : baseName, dirName;
+
+        immutable s = entry.size;
+        immutable t = entry.timeLastModified;
+        resultTableData.put([baseName(entry.name), dirName(entry.name),
+                format!"%,d KB"(s / 1024 + (s % 1024 && 1)), format!"%d/%02d/%02d %d:%02d:%02d"(t.year,
+                    t.month, t.day, t.hour, t.minute, t.second)]);
+    }
+
+    private void search()
+    {
+        auto isValid(string folderPath)
         {
-            import std.file : dirEntries, SpanMode;
-            import std.range : array;
+            import std.file : exists, isDir;
 
-            de = dirEntries(folderPath, SpanMode.shallow).array;
+            if (!folderPath.exists || !folderPath.isDir)
+            {
+                import org.eclipse.swt.widgets.MessageBox;
+                import std.format : format;
+
+                auto mb = new MessageBox(shell, SWT.ICON_ERROR);
+                mb.setText(name);
+                mb.setMessage(format!`"%s" is not a valid folder path.`(folderPath));
+                mb.open();
+                return false;
+            }
+            return true;
         }
-        catch (FileException ex)
-        {
-            import std.stdio : stderr, writeln;
 
-            stderr.writeln("Skip: ", folderPath);
-        }
+        immutable folderPath = folderText.getText();
 
-        import std.range : chain, empty;
-
-        if (de.empty)
+        if (!isValid(folderPath))
         {
             return;
         }
 
-        auto folders = de.filter!(a => a.isDir);
-        auto files = de.filter!(a => a.isFile);
-        foreach (DirEntry entry; chain(folders, files))
-        {
-            import std.algorithm.searching : canFind;
-            import std.path : baseName;
+        resetTableInfo();
 
-            if (baseName(entry.name).toLower.canFind(partialName))
+        import std.uni : toLower;
+
+        immutable partialName = searchText.getText().toLower;
+
+        void dig(string folderPath, size_t depth)
+        {
+            import std.algorithm.iteration : filter;
+            import std.file : DirEntry, FileException;
+
+            DirEntry[] de;
+            try
             {
-                addTableItem(gui, entry);
+                import std.file : dirEntries, SpanMode;
+                import std.range : array;
+
+                de = dirEntries(folderPath, SpanMode.shallow).array;
+            }
+            catch (FileException ex)
+            {
+                import std.stdio : stderr, writeln;
+
+                stderr.writeln("Skip: ", folderPath);
+            }
+
+            import std.range : chain, empty;
+
+            if (de.empty)
+            {
+                return;
+            }
+
+            auto folders = de.filter!(a => a.isDir);
+            auto files = de.filter!(a => a.isFile);
+            foreach (DirEntry entry; chain(folders, files))
+            {
+                import std.algorithm.searching : canFind;
+                import std.path : baseName;
+
+                if (baseName(entry.name).toLower.canFind(partialName))
+                {
+                    reserveTableItem(entry);
+                }
+            }
+
+            foreach (f; folders)
+            {
+                dig(f.name, depth + 1);
             }
         }
 
-        foreach (f; folders)
-        {
-            dig(f.name, depth + 1);
-        }
+        dig(folderPath, 0);
+
+        reflectTableInfo();
     }
-
-    dig(folderPath, 0);
-
-    gui.resultTable.setItemCount(cast(int) gui.resultTableData.data.length);
 }
 
 void main()
