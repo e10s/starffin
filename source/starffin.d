@@ -302,7 +302,7 @@ class GUI
             {
                 import org.eclipse.swt.events.KeyEvent;
 
-                override void keyReleased(KeyEvent e)
+                override void keyPressed(KeyEvent e)
                 {
                     if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR)
                     {
