@@ -329,14 +329,17 @@ class GUI
                         resultTable.selectAll();
                     }
                 }
+
                 override void keyReleased(KeyEvent e)
                 {
                     if (e.keyCode == SWT.DEL)
                     {
-                        import std.algorithm.iteration : filter, map;
-                        import std.algorithm.searching : canFind;
+                        import std.algorithm.iteration : filter, map, uniq;
+                        import std.algorithm.searching : canFind, startsWith;
+                        import std.algorithm.sorting : sort;
                         import std.array : empty, front;
-                        import std.path : buildPath;
+                        import std.functional : binaryReverseArgs;
+                        import std.path : buildPath, dirSeparator;
                         import std.range : enumerate, array;
 
                         auto indices = resultTable.getSelectionIndices();
@@ -346,8 +349,17 @@ class GUI
                             return;
                         }
 
-                        auto paths = resultTable.getSelection()
+                        auto pathsToBeRemoved = resultTable.getSelection()
                             .map!(a => buildPath(a.getText(1), a.getText(0))).array;
+
+                        // Remove the items, in the folders to be removed, from the table.
+                        auto locations = resultTable.getItems().map!(a => a.getText(1)).array;
+                        indices ~= locations.enumerate.filter!(loc => pathsToBeRemoved.canFind(loc.value)
+                                || pathsToBeRemoved.map!(a => a ~ dirSeparator)
+                                .canFind!(binaryReverseArgs!startsWith)(loc.value)).map!(a => cast(int) a.index)
+                            .array;
+
+                        indices = indices.sort.uniq.array;
 
                         auto newData = resultTableData.data.enumerate.filter!(a => !indices.canFind(a.index))
                             .map!(a => a.value).array;
@@ -363,7 +375,7 @@ class GUI
 
                         updateShowingLabel(this.outer);
 
-                        foreach (path; paths)
+                        foreach (path; pathsToBeRemoved)
                         {
                             try
                             {
@@ -372,7 +384,7 @@ class GUI
                                     import std.stdio : stderr, writefln;
 
                                     stderr.writefln("Deletion of these files is not performed: %s",
-                                            paths);
+                                            pathsToBeRemoved);
                                 }
                                 else
                                 {
