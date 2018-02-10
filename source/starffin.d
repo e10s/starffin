@@ -163,7 +163,6 @@ class Row5
         import org.eclipse.swt.layout.GridData;
 
         statusLabel = new Label(parent, SWT.NULL);
-        statusLabel.setText("Ready");
         statusLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 
         auto sep = new Label(parent, SWT.SEPARATOR);
@@ -210,6 +209,7 @@ class GUI
         showingLabel = r5.showingLabel;
 
         setAdapters();
+        updateStatusLabel("Ready");
         updateShowingLabel();
     }
 
@@ -449,6 +449,11 @@ class GUI
         updateShowingLabel();
     }
 
+    private void updateStatusLabel(string s)
+    {
+        statusLabel.setText(s);
+    }
+
     private void updateShowingLabel()
     {
         import std.format : format;
@@ -495,6 +500,7 @@ class GUI
 
         if (!isValid(folderPath))
         {
+            updateStatusLabel("Ready");
             return;
         }
 
@@ -550,9 +556,11 @@ class GUI
             }
         }
 
+        updateStatusLabel("Searching");
         dig(folderPath, 0);
 
         reflectTableInfo();
+        updateStatusLabel("Done");
     }
 }
 
