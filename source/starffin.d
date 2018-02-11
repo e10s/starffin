@@ -32,12 +32,12 @@ class ShellWrapper
         shell.setLayout(gl);
 
         mainView = new Composite(shell, SWT.NULL);
-        mainView.setLayoutData(new GridData(GridData.FILL_BOTH));
+        mainView.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         gl = new GridLayout(3, false);
         mainView.setLayout(gl);
 
         statusBar = new Composite(shell, SWT.NULL);
-        statusBar.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        statusBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         gl = new GridLayout(5, false);
         statusBar.setLayout(gl);
     }
@@ -63,7 +63,7 @@ class Row1
 
         folderText = new Text(parent, SWT.SINGLE | SWT.BORDER);
         folderText.setText(getcwd());
-        folderText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        folderText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         openFolderButton = new Button(parent, SWT.NULL);
         openFolderButton.setText("...");
@@ -84,7 +84,7 @@ class Row2
         new Label(parent, SWT.NULL).setText("Search:");
 
         searchText = new Text(parent, SWT.SINGLE | SWT.BORDER);
-        auto gd = new GridData(GridData.FILL_HORIZONTAL);
+        auto gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
         gd.horizontalSpan = 2;
         searchText.setLayoutData(gd);
     }
@@ -102,7 +102,7 @@ class Row3
 
         searchButton = new Button(parent, SWT.NULL);
         searchButton.setText("Search");
-        auto gd = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        auto gd = new GridData(SWT.END, SWT.CENTER, false, false);
         gd.horizontalSpan = 3;
         searchButton.setLayoutData(gd);
     }
@@ -122,7 +122,7 @@ class Row4
         resultTable = new Table(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.BORDER | SWT.VIRTUAL);
         resultTable.setHeaderVisible(true);
         resultTable.setLinesVisible(true);
-        auto gd = new GridData(GridData.FILL_BOTH);
+        auto gd = new GridData(SWT.FILL, SWT.FILL, true, true);
         gd.horizontalSpan = 3;
         gd.heightHint = 400;
         resultTable.setLayoutData(gd);
