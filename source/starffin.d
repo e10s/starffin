@@ -36,9 +36,9 @@ class ShellWrapper
         gl = new GridLayout(3, false);
         mainView.setLayout(gl);
 
-        statusBar = new Composite(shell, SWT.NULL | SWT.BORDER);
+        statusBar = new Composite(shell, SWT.NULL);
         statusBar.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        gl = new GridLayout(3, false);
+        gl = new GridLayout(5, false);
         statusBar.setLayout(gl);
     }
 
@@ -156,7 +156,7 @@ class Row5
 {
     import org.eclipse.swt.widgets.Label;
 
-    Label statusLabel, showingLabel;
+    Label statusLabel, showingLabel, selectingLabel;
 
     this(C)(C parent)
     {
@@ -165,13 +165,23 @@ class Row5
         statusLabel = new Label(parent, SWT.NULL);
         statusLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 
-        auto sep = new Label(parent, SWT.SEPARATOR);
-        auto gd = new GridData(SWT.END, SWT.CENTER, false, true);
-        gd.heightHint = statusLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-        sep.setLayoutData(gd);
+        auto gd = {
+            auto a = new GridData(SWT.END, SWT.CENTER, false, true);
+            a.heightHint = statusLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+            return a;
+        };
+
+        auto sep1 = new Label(parent, SWT.SEPARATOR);
+        sep1.setLayoutData(gd());
 
         showingLabel = new Label(parent, SWT.NULL);
         showingLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, true));
+
+        auto sep2 = new Label(parent, SWT.SEPARATOR);
+        sep2.setLayoutData(gd());
+
+        selectingLabel = new Label(parent, SWT.NULL);
+        selectingLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, true));
     }
 }
 
@@ -191,7 +201,7 @@ class GUI
     private Button openFolderButton, searchButton;
     private Table resultTable;
     private Appender!(string[][]) resultTableData;
-    private Label statusLabel, showingLabel;
+    private Label statusLabel, showingLabel, selectingLabel;
 
     this()
     {
@@ -207,10 +217,12 @@ class GUI
         auto r5 = new Row5(shellWrapper.statusBar);
         statusLabel = r5.statusLabel;
         showingLabel = r5.showingLabel;
+        selectingLabel = r5.selectingLabel;
 
         setAdapters();
         updateStatusLabel("Ready");
         updateShowingLabel();
+        updateSelectingLabel();
     }
 
     private void setAdapters()
@@ -327,6 +339,7 @@ class GUI
                     if (e.stateMask == SWT.CTRL && e.keyCode == 'a')
                     {
                         resultTable.selectAll();
+                        updateSelectingLabel();
                     }
                 }
 
@@ -371,7 +384,7 @@ class GUI
 
                         immutable maxIdx = cast(int) resultTable.getItemCount() - 1;
                         resultTable.setSelection(min(maxIdx, indices.front));
-
+                        updateSelectingLabel();
                         updateShowingLabel();
 
                         foreach (path; pathsToBeRemoved)
@@ -428,6 +441,23 @@ class GUI
             resultTable.addListener(SWT.SetData, new ResultTableSetDataListener);
         }
 
+        void setResultTableSelectionAdapter()
+        {
+            import org.eclipse.swt.events.SelectionAdapter;
+
+            class ResultTableSelectionAdapter : SelectionAdapter
+            {
+                import org.eclipse.swt.events.SelectionEvent;
+
+                override void widgetSelected(SelectionEvent e)
+                {
+                    updateSelectingLabel();
+                }
+            }
+
+            resultTable.addSelectionListener(new ResultTableSelectionAdapter);
+        }
+
         setFolderDropTargetAdapter();
         setFolderSelectionAdapter();
         setSearchSelectionAdapter();
@@ -435,11 +465,13 @@ class GUI
         setTextKeyAdapter(searchText);
         setResultTableKeyAdapter();
         setResultTableSetDataListener();
+        setResultTableSelectionAdapter();
     }
 
     private void reflectTableInfo()
     {
         resultTable.setItemCount(cast(int) resultTableData.data.length);
+        updateSelectingLabel();
     }
 
     private void resetTableInfo()
@@ -447,6 +479,7 @@ class GUI
         resultTable.removeAll();
         resultTableData.clear();
         updateShowingLabel();
+        updateSelectingLabel();
     }
 
     private void updateStatusLabel(string s)
@@ -460,6 +493,14 @@ class GUI
 
         showingLabel.setText(format!"Showing: %s"(resultTable.getItemCount()));
         showingLabel.getParent().layout();
+    }
+
+    private void updateSelectingLabel()
+    {
+        import std.format : format;
+
+        selectingLabel.setText(format!"Selecting: %s"(resultTable.getSelectionCount()));
+        selectingLabel.getParent().layout();
     }
 
     import std.file : DirEntry;
