@@ -202,7 +202,7 @@ class GUI
     private Appender!(string[][]) resultTableData;
     private Label statusLabel, showingLabel, selectingLabel;
 
-    private HistoryManager folderHistory;
+    private HistoryManager folderHistory, searchHistory;
 
     this()
     {
@@ -226,10 +226,11 @@ class GUI
         updateSelectingLabel();
     }
 
-    this(HistoryManager folderHistory)
+    this(HistoryManager folderHistory, HistoryManager searchHistory)
     {
         this();
         this.folderHistory = folderHistory;
+        this.searchHistory = searchHistory;
 
         import std.array : array;
 
@@ -241,6 +242,8 @@ class GUI
             folderText.setText(getcwd());
         }
         folderText.select(0);
+
+        searchText.setItems(searchHistory.sorted.array);
     }
 
     private void setAdapters()
@@ -628,8 +631,9 @@ void main()
     import history;
 
     auto folderHistory = new HistoryManager("folder_history.dat");
+    auto searchHistory = new HistoryManager("search_history.dat");
 
-    auto gui = new GUI(folderHistory);
+    auto gui = new GUI(folderHistory, searchHistory);
     gui.shell.pack();
     gui.shell.open();
 
