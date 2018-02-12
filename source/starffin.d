@@ -194,6 +194,7 @@ class GUI
     import org.eclipse.swt.widgets.Text;
     import org.eclipse.swt.widgets.Table;
     import std.array : Appender;
+    import history : HistoryManager;
 
     Shell shell;
     Display display;
@@ -202,6 +203,8 @@ class GUI
     private Table resultTable;
     private Appender!(string[][]) resultTableData;
     private Label statusLabel, showingLabel, selectingLabel;
+
+    private HistoryManager folderHistory;
 
     this()
     {
@@ -223,6 +226,16 @@ class GUI
         updateStatusLabel("Ready");
         updateShowingLabel();
         updateSelectingLabel();
+    }
+
+    this(HistoryManager folderHistory)
+    {
+        this();
+        this.folderHistory = folderHistory;
+        if (!folderHistory.sorted.empty)
+        {
+            folderText.setText(folderHistory.sorted.front);
+        }
     }
 
     private void setAdapters()
@@ -607,7 +620,11 @@ class GUI
 
 void main()
 {
-    auto gui = new GUI;
+    import history;
+
+    auto folderHistory = new HistoryManager("folder_history.dat");
+
+    auto gui = new GUI(folderHistory);
     gui.shell.pack();
     gui.shell.open();
 
