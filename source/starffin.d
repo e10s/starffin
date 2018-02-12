@@ -71,9 +71,9 @@ class Row1
 // 2nd row
 class Row2
 {
-    import org.eclipse.swt.widgets.Text;
+    import org.eclipse.swt.widgets.Combo;
 
-    Text searchText;
+    Combo searchText;
     this(C)(C parent)
     {
         import org.eclipse.swt.layout.GridData;
@@ -81,7 +81,7 @@ class Row2
 
         new Label(parent, SWT.NULL).setText("Search:");
 
-        searchText = new Text(parent, SWT.SINGLE | SWT.BORDER);
+        searchText = new Combo(parent, SWT.DROP_DOWN);
         auto gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
         gd.horizontalSpan = 2;
         searchText.setLayoutData(gd);
@@ -190,15 +190,13 @@ class GUI
     import org.eclipse.swt.widgets.Display;
     import org.eclipse.swt.widgets.Label;
     import org.eclipse.swt.widgets.Shell;
-    import org.eclipse.swt.widgets.Text;
     import org.eclipse.swt.widgets.Table;
     import std.array : Appender;
     import history : HistoryManager;
 
     Shell shell;
     Display display;
-    private Combo folderText;
-    private Text searchText;
+    private Combo folderText, searchText;
     private Button openFolderButton, searchButton;
     private Table resultTable;
     private Appender!(string[][]) resultTableData;
@@ -326,7 +324,7 @@ class GUI
             searchButton.addSelectionListener(new SearchSelectionAdapter);
         }
 
-        void setTextKeyAdapter(C)(C text)
+        void setTextKeyAdapter(Combo text)
         {
             import org.eclipse.swt.events.KeyAdapter;
 
@@ -338,7 +336,7 @@ class GUI
                 {
                     if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR)
                     {
-                        this.outer.search();
+                        search();
                     }
                 }
             }
