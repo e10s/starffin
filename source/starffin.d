@@ -62,7 +62,7 @@ class Row1
 
         folderText = new Combo(parent, SWT.DROP_DOWN);
         folderText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
+        folderText.setVisibleItemCount(30);
         openFolderButton = new Button(parent, SWT.NULL);
         openFolderButton.setText("...");
     }
@@ -85,6 +85,7 @@ class Row2
         auto gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
         gd.horizontalSpan = 2;
         searchText.setLayoutData(gd);
+        searchText.setVisibleItemCount(30);
     }
 }
 
