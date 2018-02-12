@@ -244,6 +244,7 @@ class GUI
         folderText.select(0);
 
         searchText.setItems(searchHistory.sorted.array);
+        searchText.paste();
     }
 
     private void setAdapters()
