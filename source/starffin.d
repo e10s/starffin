@@ -624,6 +624,16 @@ class GUI
 
         reflectTableInfo();
         updateStatusLabel("Done");
+
+        import std.array : array;
+
+        folderHistory.update(folderText.getText());
+        folderText.setItems(folderHistory.sorted.array);
+        folderText.select(0);
+
+        searchHistory.update(searchText.getText());
+        searchText.setItems(searchHistory.sorted.array);
+        searchText.select(0);
     }
 }
 
