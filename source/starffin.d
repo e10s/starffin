@@ -11,16 +11,16 @@ immutable name = "Starffin";
 
 class ShellWrapper
 {
-    import org.eclipse.swt.widgets.Composite;
-    import org.eclipse.swt.widgets.Display;
-    import org.eclipse.swt.widgets.Shell;
+    import org.eclipse.swt.widgets.Composite : Composite;
+    import org.eclipse.swt.widgets.Display : Display;
+    import org.eclipse.swt.widgets.Shell : Shell;
 
     Shell shell;
     Composite mainView, statusBar;
     this()
     {
-        import org.eclipse.swt.layout.GridData;
-        import org.eclipse.swt.layout.GridLayout;
+        import org.eclipse.swt.layout.GridData : GridData;
+        import org.eclipse.swt.layout.GridLayout : GridLayout;
 
         shell = new Shell(new Display);
         shell.setText(name);
@@ -48,15 +48,15 @@ class ShellWrapper
 // 1st row
 class Row1
 {
-    import org.eclipse.swt.widgets.Button;
-    import org.eclipse.swt.widgets.Combo;
+    import org.eclipse.swt.widgets.Button : Button;
+    import org.eclipse.swt.widgets.Combo : Combo;
 
     Combo folderText;
     Button openFolderButton;
     this(C)(C parent)
     {
-        import org.eclipse.swt.layout.GridData;
-        import org.eclipse.swt.widgets.Label;
+        import org.eclipse.swt.layout.GridData : GridData;
+        import org.eclipse.swt.widgets.Label : Label;
 
         new Label(parent, SWT.NULL).setText("Folder:");
 
@@ -71,13 +71,13 @@ class Row1
 // 2nd row
 class Row2
 {
-    import org.eclipse.swt.widgets.Combo;
+    import org.eclipse.swt.widgets.Combo : Combo;
 
     Combo searchText;
     this(C)(C parent)
     {
-        import org.eclipse.swt.layout.GridData;
-        import org.eclipse.swt.widgets.Label;
+        import org.eclipse.swt.layout.GridData : GridData;
+        import org.eclipse.swt.widgets.Label : Label;
 
         new Label(parent, SWT.NULL).setText("Search:");
 
@@ -91,12 +91,12 @@ class Row2
 // 3rd row
 class Row3
 {
-    import org.eclipse.swt.widgets.Button;
+    import org.eclipse.swt.widgets.Button : Button;
 
     Button searchButton;
     this(C)(C parent)
     {
-        import org.eclipse.swt.layout.GridData;
+        import org.eclipse.swt.layout.GridData : GridData;
 
         searchButton = new Button(parent, SWT.NULL);
         searchButton.setText("Search");
@@ -109,13 +109,12 @@ class Row3
 // 4th row
 class Row4
 {
-    //import org.eclipse.swt.widgets.Shell;
-    import org.eclipse.swt.widgets.Table;
+    import org.eclipse.swt.widgets.Table : Table;
 
     Table resultTable;
     this(C)(C parent)
     {
-        import org.eclipse.swt.layout.GridData;
+        import org.eclipse.swt.layout.GridData : GridData;
 
         resultTable = new Table(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.BORDER | SWT.VIRTUAL);
         resultTable.setHeaderVisible(true);
@@ -140,7 +139,7 @@ class Row4
 
         foreach (t; tableColumns)
         {
-            import org.eclipse.swt.widgets.TableColumn;
+            import org.eclipse.swt.widgets.TableColumn : TableColumn;
 
             auto col = new TableColumn(resultTable, t.alignLeft ? SWT.LEFT : SWT.RIGHT);
             col.setText(t.text);
@@ -152,13 +151,13 @@ class Row4
 // 5th row
 class Row5
 {
-    import org.eclipse.swt.widgets.Label;
+    import org.eclipse.swt.widgets.Label : Label;
 
     Label statusLabel, showingLabel, selectingLabel;
 
     this(C)(C parent)
     {
-        import org.eclipse.swt.layout.GridData;
+        import org.eclipse.swt.layout.GridData : GridData;
 
         statusLabel = new Label(parent, SWT.NULL);
         statusLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
@@ -185,12 +184,12 @@ class Row5
 
 class GUI
 {
-    import org.eclipse.swt.widgets.Button;
-    import org.eclipse.swt.widgets.Combo;
-    import org.eclipse.swt.widgets.Display;
-    import org.eclipse.swt.widgets.Label;
-    import org.eclipse.swt.widgets.Shell;
-    import org.eclipse.swt.widgets.Table;
+    import org.eclipse.swt.widgets.Button : Button;
+    import org.eclipse.swt.widgets.Combo : Combo;
+    import org.eclipse.swt.widgets.Display : Display;
+    import org.eclipse.swt.widgets.Label : Label;
+    import org.eclipse.swt.widgets.Shell : Shell;
+    import org.eclipse.swt.widgets.Table : Table;
     import std.array : Appender;
     import history : HistoryManager;
 
@@ -251,13 +250,13 @@ class GUI
     {
         void setFolderDropTargetAdapter()
         {
-            import org.eclipse.swt.dnd.DropTargetAdapter;
-            import org.eclipse.swt.dnd.DND;
+            import org.eclipse.swt.dnd.DropTargetAdapter : DropTargetAdapter;
+            import org.eclipse.swt.dnd.DND : DND;
 
             class FolderDropTargetAdapter : DropTargetAdapter
             {
 
-                import org.eclipse.swt.dnd.DropTargetEvent;
+                import org.eclipse.swt.dnd.DropTargetEvent : DropTargetEvent;
 
                 override void dragEnter(DropTargetEvent e)
                 {
@@ -278,9 +277,9 @@ class GUI
                 }
             }
 
-            import org.eclipse.swt.dnd.DropTarget;
-            import org.eclipse.swt.dnd.FileTransfer;
-            import org.eclipse.swt.dnd.Transfer;
+            import org.eclipse.swt.dnd.DropTarget : DropTarget;
+            import org.eclipse.swt.dnd.FileTransfer : FileTransfer;
+            import org.eclipse.swt.dnd.Transfer : Transfer;
 
             auto target = new DropTarget(folderText, DND.DROP_DEFAULT | DND.DROP_COPY);
             target.setTransfer([cast(Transfer) FileTransfer.getInstance()]);
@@ -289,15 +288,15 @@ class GUI
 
         void setFolderSelectionAdapter()
         {
-            import org.eclipse.swt.events.SelectionAdapter;
+            import org.eclipse.swt.events.SelectionAdapter : SelectionAdapter;
 
             class FolderSelectionAdapter : SelectionAdapter
             {
-                import org.eclipse.swt.events.SelectionEvent;
+                import org.eclipse.swt.events.SelectionEvent : SelectionEvent;
 
                 override void widgetSelected(SelectionEvent e)
                 {
-                    import org.eclipse.swt.widgets.DirectoryDialog;
+                    import org.eclipse.swt.widgets.DirectoryDialog : DirectoryDialog;
 
                     auto dialog = new DirectoryDialog(openFolderButton.getShell());
                     dialog.setFilterPath(folderText.getText());
@@ -313,11 +312,11 @@ class GUI
 
         void setSearchSelectionAdapter()
         {
-            import org.eclipse.swt.events.SelectionAdapter;
+            import org.eclipse.swt.events.SelectionAdapter : SelectionAdapter;
 
             class SearchSelectionAdapter : SelectionAdapter
             {
-                import org.eclipse.swt.events.SelectionEvent;
+                import org.eclipse.swt.events.SelectionEvent : SelectionEvent;
 
                 override void widgetSelected(SelectionEvent e)
                 {
@@ -330,11 +329,11 @@ class GUI
 
         void setTextKeyAdapter(Combo text)
         {
-            import org.eclipse.swt.events.KeyAdapter;
+            import org.eclipse.swt.events.KeyAdapter : KeyAdapter;
 
             class TextKeyAdapter : KeyAdapter
             {
-                import org.eclipse.swt.events.KeyEvent;
+                import org.eclipse.swt.events.KeyEvent : KeyEvent;
 
                 override void keyPressed(KeyEvent e)
                 {
@@ -350,11 +349,11 @@ class GUI
 
         void setResultTableKeyAdapter()
         {
-            import org.eclipse.swt.events.KeyAdapter;
+            import org.eclipse.swt.events.KeyAdapter : KeyAdapter;
 
             class ResultTableKeyAdapter : KeyAdapter
             {
-                import org.eclipse.swt.events.KeyEvent;
+                import org.eclipse.swt.events.KeyEvent : KeyEvent;
 
                 override void keyPressed(KeyEvent e)
                 {
@@ -372,10 +371,10 @@ class GUI
                         import std.algorithm.iteration : filter, map, uniq;
                         import std.algorithm.searching : canFind, startsWith;
                         import std.algorithm.sorting : sort;
-                        import std.array : empty, front;
+                        import std.array : array, empty, front;
                         import std.functional : binaryReverseArgs;
                         import std.path : buildPath, dirSeparator;
-                        import std.range : enumerate, array;
+                        import std.range : enumerate;
 
                         auto indices = resultTable.getSelectionIndices();
 
@@ -443,15 +442,15 @@ class GUI
 
         void setResultTableSetDataListener()
         {
-            import org.eclipse.swt.widgets.Listener;
+            import org.eclipse.swt.widgets.Listener : Listener;
 
             class ResultTableSetDataListener : Listener
             {
-                import org.eclipse.swt.widgets.Event;
+                import org.eclipse.swt.widgets.Event : Event;
 
                 void handleEvent(Event e)
                 {
-                    import org.eclipse.swt.widgets.TableItem;
+                    import org.eclipse.swt.widgets.TableItem : TableItem;
 
                     auto item = cast(TableItem) e.item;
                     item.setText(resultTableData.data[resultTable.indexOf(item)]);
@@ -465,11 +464,11 @@ class GUI
 
         void setResultTableSelectionAdapter()
         {
-            import org.eclipse.swt.events.SelectionAdapter;
+            import org.eclipse.swt.events.SelectionAdapter : SelectionAdapter;
 
             class ResultTableSelectionAdapter : SelectionAdapter
             {
-                import org.eclipse.swt.events.SelectionEvent;
+                import org.eclipse.swt.events.SelectionEvent : SelectionEvent;
 
                 override void widgetSelected(SelectionEvent e)
                 {
@@ -547,7 +546,7 @@ class GUI
 
             if (!folderPath.exists || !folderPath.isDir)
             {
-                import org.eclipse.swt.widgets.MessageBox;
+                import org.eclipse.swt.widgets.MessageBox : MessageBox;
                 import std.format : format;
 
                 auto mb = new MessageBox(shell, SWT.ICON_ERROR);
@@ -581,8 +580,8 @@ class GUI
             DirEntry[] de;
             try
             {
+                import std.array : array;
                 import std.file : dirEntries, SpanMode;
-                import std.range : array;
 
                 de = dirEntries(folderPath, SpanMode.shallow).array;
             }
@@ -629,7 +628,7 @@ class GUI
 
 void main()
 {
-    import history;
+    import history : HistoryManager;
 
     auto folderHistory = new HistoryManager("folder_history.dat");
     auto searchHistory = new HistoryManager("search_history.dat");
