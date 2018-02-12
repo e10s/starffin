@@ -49,20 +49,18 @@ class ShellWrapper
 class Row1
 {
     import org.eclipse.swt.widgets.Button;
-    import org.eclipse.swt.widgets.Text;
+    import org.eclipse.swt.widgets.Combo;
 
-    Text folderText;
+    Combo folderText;
     Button openFolderButton;
     this(C)(C parent)
     {
         import org.eclipse.swt.layout.GridData;
         import org.eclipse.swt.widgets.Label;
-        import std.file : getcwd;
 
         new Label(parent, SWT.NULL).setText("Folder:");
 
-        folderText = new Text(parent, SWT.SINGLE | SWT.BORDER);
-        folderText.setText(getcwd());
+        folderText = new Combo(parent, SWT.DROP_DOWN);
         folderText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         openFolderButton = new Button(parent, SWT.NULL);
@@ -188,6 +186,7 @@ class Row5
 class GUI
 {
     import org.eclipse.swt.widgets.Button;
+    import org.eclipse.swt.widgets.Combo;
     import org.eclipse.swt.widgets.Display;
     import org.eclipse.swt.widgets.Label;
     import org.eclipse.swt.widgets.Shell;
@@ -198,7 +197,8 @@ class GUI
 
     Shell shell;
     Display display;
-    private Text folderText, searchText;
+    private Combo folderText;
+    private Text searchText;
     private Button openFolderButton, searchButton;
     private Table resultTable;
     private Appender!(string[][]) resultTableData;
@@ -232,10 +232,17 @@ class GUI
     {
         this();
         this.folderHistory = folderHistory;
-        if (!folderHistory.sorted.empty)
+
+        import std.array : array;
+
+        folderText.setItems(folderHistory.sorted.array);
+        if (!folderText.getItemCount())
         {
-            folderText.setText(folderHistory.sorted.front);
+            import std.file : getcwd;
+
+            folderText.setText(getcwd());
         }
+        folderText.select(0);
     }
 
     private void setAdapters()
@@ -319,7 +326,7 @@ class GUI
             searchButton.addSelectionListener(new SearchSelectionAdapter);
         }
 
-        void setTextKeyAdapter(Text text)
+        void setTextKeyAdapter(C)(C text)
         {
             import org.eclipse.swt.events.KeyAdapter;
 
@@ -331,7 +338,7 @@ class GUI
                 {
                     if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR)
                     {
-                        search();
+                        this.outer.search();
                     }
                 }
             }
