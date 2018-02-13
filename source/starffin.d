@@ -643,7 +643,11 @@ void main()
 
     auto folderHistory = new HistoryManager("folder_history.dat");
     auto searchHistory = new HistoryManager("search_history.dat");
-
+    scope (exit)
+    {
+        folderHistory.saveToFile();
+        searchHistory.saveToFile();
+    }
     auto gui = new GUI(folderHistory, searchHistory);
     gui.shell.pack();
     gui.shell.open();
