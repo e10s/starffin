@@ -411,27 +411,26 @@ class GUI
 
                         foreach (path; pathsToBeRemoved)
                         {
-                            try
+                            version (Starffin_NoFileDeletion)
                             {
-                                version (Starffin_NoFileDeletion)
-                                {
-                                    import std.stdio : stderr, writefln;
+                                import std.experimental.logger : infof;
 
-                                    stderr.writefln("Deletion of these files is not performed: %s",
-                                            pathsToBeRemoved);
-                                }
-                                else
+                                infof("[DRY RUN] moveToTrash(`%s`)", path);
+                            }
+                            else
+                            {
+                                try
                                 {
                                     import trashcan : moveToTrash;
 
                                     moveToTrash(path);
                                 }
-                            }
-                            catch (Exception ex)
-                            {
-                                import std.stdio : stderr, writefln;
+                                catch (Exception ex)
+                                {
+                                    import std.experimental.logger : warningf;
 
-                                stderr.writefln("%s: %s", ex.msg, path);
+                                    warningf("%s: %s", ex.msg, path);
+                                }
                             }
                         }
                     }
@@ -588,9 +587,9 @@ class GUI
             }
             catch (FileException ex)
             {
-                import std.stdio : stderr, writeln;
+                import std.experimental.logger : infof;
 
-                stderr.writeln("Skip: ", folderPath);
+                infof("Skip: %s", folderPath);
             }
 
             import std.range : chain, empty;
