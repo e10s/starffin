@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity name="starffin" version="1.0.0.0" processorArchitecture="*" type="win32" />
+  <description />
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity name="Microsoft.Windows.Common-Controls" version="6.0.0.0" publicKeyToken="6595b64144ccf1df" processorArchitecture="*" language="*" type="win32" />
+    </dependentAssembly>
+  </dependency>
+</assembly>
