@@ -224,6 +224,7 @@ class GUI
         updateStatusLabel("Ready");
         updateShowingLabel();
         updateSelectingLabel();
+        setWindowIcon();
     }
 
     this(HistoryManager folderHistory, HistoryManager searchHistory)
@@ -634,6 +635,17 @@ class GUI
         searchText.setItems(searchHistory.sorted.array);
         searchText.select(0);
     }
+
+    private void setWindowIcon()
+    {
+        import icon;
+
+        auto windowIcon = getIconFromResource("STARFFIN_ICON");
+        if (windowIcon !is null && !windowIcon.isDisposed())
+        {
+            shell.setImage(windowIcon);
+        }
+    }
 }
 
 void main()
@@ -650,7 +662,6 @@ void main()
     auto gui = new GUI(folderHistory, searchHistory);
     gui.shell.pack();
     gui.shell.open();
-
     while (!gui.shell.isDisposed())
     {
         if (!gui.display.readAndDispatch())

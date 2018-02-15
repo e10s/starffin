@@ -11,6 +11,9 @@
 		"dwt": "~>1.0.0",
 		"trashcan": "~>0.2.2"
 	},
+	"sourceFiles": [
+		"res/resource.res"
+	],
 	"lflags": [
 		"/ENTRY:mainCRTStartup"
 	],
