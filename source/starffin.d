@@ -475,6 +475,31 @@ class GUI
                 {
                     updateSelectingLabel();
                 }
+
+                override void widgetDefaultSelected(SelectionEvent e)
+                {
+                    import org.eclipse.swt.widgets.TableItem : TableItem;
+                    import std.algorithm.iteration : filter;
+                    import std.algorithm.searching : startsWith;
+                    import std.array : array;
+                    import std.file : exists, isDir;
+                    import std.path : buildPath, dirSeparator;
+
+                    auto item = cast(TableItem) e.item;
+                    auto path = buildPath(item.getText(1), item.getText(0));
+
+                    if (!path.exists || !path.isDir)
+                    {
+                        return;
+                    }
+
+                    auto newData = resultTableData.data.filter!(loc => loc[1] == path
+                            || loc[1].startsWith(path ~ dirSeparator)).array;
+                    resetTableInfo();
+                    resultTableData.put(newData);
+                    reflectTableInfo();
+                    folderText.setText(path);
+                }
             }
 
             resultTable.addSelectionListener(new ResultTableSelectionAdapter);
