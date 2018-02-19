@@ -339,8 +339,10 @@ class GUI
 
                 override void keyPressed(KeyEvent e)
                 {
-                    if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR)
+                    if ((e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR)
+                            && !text.getListVisible())
                     {
+
                         search();
                     }
                 }
