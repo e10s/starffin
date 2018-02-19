@@ -345,6 +345,33 @@ class GUI
 
                         search();
                     }
+                    else if (e.keyCode == SWT.DEL && text.getListVisible())
+                    {
+                        e.doit = false;
+
+                        immutable idx = text.getSelectionIndex();
+                        if (idx == -1)
+                        {
+                            return;
+                        }
+
+                        HistoryManager his;
+                        if (text == folderText)
+                        {
+                            his = folderHistory;
+                        }
+                        else if (text == searchText)
+                        {
+                            his = searchHistory;
+                        }
+                        else{
+                            assert(0);
+                        }
+
+                        his.remove(text.getItem(idx));
+                        text.remove(idx);
+                        text.select(text.getItemCount() == idx ? idx - 1 : idx);
+                    }
                 }
             }
 
