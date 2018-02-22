@@ -2,7 +2,7 @@ module history;
 
 class HistoryManager
 {
-    private string filePath;
+    private immutable string filePath;
     private long[string] keyToPriority;
     private long maxPriority;
 
@@ -22,9 +22,9 @@ class HistoryManager
         }
         catch (ErrnoException ex)
         {
-            import std.stdio : stderr, writeln;
+            import std.experimental.logger : warning;
 
-            stderr.writeln(ex.msg);
+            warning(ex.msg);
         }
 
         if (!f.isOpen)
@@ -67,9 +67,9 @@ class HistoryManager
         }
         catch (ErrnoException ex)
         {
-            import std.stdio : stderr, writeln;
+            import std.experimental.logger : warning;
 
-            stderr.writeln(ex.msg);
+            warning(ex.msg);
         }
 
         if (!f.isOpen)

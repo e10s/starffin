@@ -1,6 +1,6 @@
 module starffin;
 
-import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWT : SWT;
 
 debug
 {
@@ -250,7 +250,6 @@ class GUI
 
     private void setAdapters()
     {
-        void setFolderDropTargetAdapter()
         {
             import org.eclipse.swt.dnd.DropTargetAdapter : DropTargetAdapter;
             import org.eclipse.swt.dnd.DND : DND;
@@ -288,7 +287,6 @@ class GUI
             target.addDropListener(new FolderDropTargetAdapter);
         }
 
-        void setFolderSelectionAdapter()
         {
             import org.eclipse.swt.events.SelectionAdapter : SelectionAdapter;
 
@@ -312,7 +310,6 @@ class GUI
             openFolderButton.addSelectionListener(new FolderSelectionAdapter);
         }
 
-        void setSearchSelectionAdapter()
         {
             import org.eclipse.swt.events.SelectionAdapter : SelectionAdapter;
 
@@ -329,7 +326,7 @@ class GUI
             searchButton.addSelectionListener(new SearchSelectionAdapter);
         }
 
-        void setTextKeyAdapter(Combo text)
+        foreach (text; [folderText, searchText])
         {
             import org.eclipse.swt.events.KeyAdapter : KeyAdapter;
 
@@ -364,7 +361,8 @@ class GUI
                         {
                             his = searchHistory;
                         }
-                        else{
+                        else
+                        {
                             assert(0);
                         }
 
@@ -378,7 +376,6 @@ class GUI
             text.addKeyListener(new TextKeyAdapter);
         }
 
-        void setResultTableKeyAdapter()
         {
             import org.eclipse.swt.events.KeyAdapter : KeyAdapter;
 
@@ -470,7 +467,6 @@ class GUI
             resultTable.addKeyListener(new ResultTableKeyAdapter);
         }
 
-        void setResultTableSetDataListener()
         {
             import org.eclipse.swt.widgets.Listener : Listener;
 
@@ -492,7 +488,6 @@ class GUI
             resultTable.addListener(SWT.SetData, new ResultTableSetDataListener);
         }
 
-        void setResultTableSelectionAdapter()
         {
             import org.eclipse.swt.events.SelectionAdapter : SelectionAdapter;
 
@@ -533,15 +528,6 @@ class GUI
 
             resultTable.addSelectionListener(new ResultTableSelectionAdapter);
         }
-
-        setFolderDropTargetAdapter();
-        setFolderSelectionAdapter();
-        setSearchSelectionAdapter();
-        setTextKeyAdapter(folderText);
-        setTextKeyAdapter(searchText);
-        setResultTableKeyAdapter();
-        setResultTableSetDataListener();
-        setResultTableSelectionAdapter();
     }
 
     private void reflectTableInfo()
@@ -692,7 +678,7 @@ class GUI
 
     private void setWindowIcon()
     {
-        import icon;
+        import icon : getIconFromResource;
 
         auto windowIcon = getIconFromResource("STARFFIN_ICON");
         if (windowIcon !is null && !windowIcon.isDisposed())
