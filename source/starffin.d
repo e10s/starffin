@@ -8,6 +8,24 @@ debug
 }
 
 immutable name = "Starffin";
+immutable buildId = {
+    import std.array : join, split;
+    import std.datetime.date : DateTime;
+
+    return DateTime.fromSimpleString((t => [t[4], t[1], ("0" ~ t[2])[$ - 2 .. $]].join(
+            "-") ~ " " ~ t[3])(__TIMESTAMP__.split)).toISOString.split("T").join;
+}();
+immutable windowTitle = {
+    debug
+    {
+        return name ~ " [DEBUG] [Build " ~ buildId ~ "]";
+
+    }
+    else
+    {
+        return name;
+    }
+}();
 
 class ShellWrapper
 {
@@ -23,7 +41,7 @@ class ShellWrapper
         import org.eclipse.swt.layout.GridLayout : GridLayout;
 
         shell = new Shell(new Display);
-        shell.setText(name);
+        shell.setText(windowTitle);
 
         auto gl = new GridLayout(1, false);
         gl.marginHeight = 0;
