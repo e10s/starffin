@@ -79,7 +79,9 @@ class Row1
         new Label(parent, SWT.NULL).setText("Folder:");
 
         folderText = new Combo(parent, SWT.DROP_DOWN);
-        folderText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        auto gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
+        gd.widthHint = 200; //
+        folderText.setLayoutData(gd);
         folderText.setVisibleItemCount(30);
         openFolderButton = new Button(parent, SWT.NULL);
         openFolderButton.setText("...");
@@ -102,6 +104,7 @@ class Row2
         searchText = new Combo(parent, SWT.DROP_DOWN);
         auto gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
         gd.horizontalSpan = 2;
+        gd.widthHint = 200; //
         searchText.setLayoutData(gd);
         searchText.setVisibleItemCount(30);
     }
@@ -434,15 +437,20 @@ class GUI
 
                         // Remove the items, in the folders to be removed, from the table.
                         auto locations = resultTable.getItems().map!(a => a.getText(1)).array;
-                        indices ~= locations.enumerate.filter!(loc => pathsToBeRemoved.canFind(loc.value)
-                                || pathsToBeRemoved.map!(a => a ~ dirSeparator)
-                                .canFind!(binaryReverseArgs!startsWith)(loc.value)).map!(a => cast(int) a.index)
+                        indices ~= locations.enumerate
+                            .filter!(loc => pathsToBeRemoved.canFind(loc.value)
+                                    || pathsToBeRemoved.map!(a => a ~ dirSeparator)
+                                    .canFind!(binaryReverseArgs!startsWith)(loc.value))
+                            .map!(a => cast(int) a.index)
                             .array;
 
                         indices = indices.sort.uniq.array;
 
-                        auto newData = resultTableData.data.enumerate.filter!(a => !indices.canFind(a.index))
-                            .map!(a => a.value).array;
+                        auto newData = resultTableData.data
+                            .enumerate
+                            .filter!(a => !indices.canFind(a.index))
+                            .map!(a => a.value)
+                            .array;
                         resetTableInfo();
                         resultTableData.put(newData);
                         reflectTableInfo();
