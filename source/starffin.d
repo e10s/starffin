@@ -532,23 +532,43 @@ class GUI
                     import std.algorithm.iteration : filter;
                     import std.algorithm.searching : startsWith;
                     import std.array : array;
-                    import std.file : exists, isDir;
+                    import std.file : exists, isDir, isFile;
                     import std.path : buildPath, dirSeparator;
 
                     auto item = cast(TableItem) e.item;
                     auto path = buildPath(item.getText(1), item.getText(0));
 
-                    if (!path.exists || !path.isDir)
+                    if (!path.exists)
                     {
                         return;
                     }
 
-                    auto newData = resultTableData.data.filter!(loc => loc[1] == path
-                            || loc[1].startsWith(path ~ dirSeparator)).array;
-                    resetTableInfo();
-                    resultTableData.put(newData);
-                    reflectTableInfo();
-                    folderText.setText(path);
+                    if (path.isDir)
+                    {
+                        auto newData = resultTableData.data.filter!(loc => loc[1] == path
+                                || loc[1].startsWith(path ~ dirSeparator)).array;
+                        resetTableInfo();
+                        resultTableData.put(newData);
+                        reflectTableInfo();
+                        folderText.setText(path);
+                    }
+                    else if (path.isFile)
+                    {
+                        version (Windows)
+                        {
+                            import std.process : Config, spawnShell;
+
+                            spawnShell(`explorer.exe /select,` ~ path, null,
+                                    Config.suppressConsole);
+                        }
+                        else
+                        {
+                            import std.path : dirName;
+                            import org.eclipse.swt.program.Program : Program;
+
+                            Program.launch(dirName(path));
+                        }
+                    }
                 }
             }
 
